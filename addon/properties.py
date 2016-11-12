@@ -31,7 +31,7 @@ class fast_lattice(PropertyGroup):
     items = [
       ('DEFAULT', 'Default', 'The default method that works well with most selections.'),
       ('SIMPLE', 'Simple', 'The simple method that works well with most selections and is the fastest. (Often produces the same result)'),
-      ('PLANAR', 'Planar', 'The planar method that works with all selections but is the slowest')
+      # ('PLANAR', 'Planar', 'The planar method that works with all selections but is the slowest')
     ],
     default = 'DEFAULT'
   )

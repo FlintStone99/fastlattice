@@ -177,7 +177,7 @@ class fast_lattice(Operator):
             control = test
             self.minimum_matrix = matrix
 
-    else:
+    else: # planar
 
       pass
 
