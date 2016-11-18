@@ -5,12 +5,23 @@ from bpy.props import FloatProperty, BoolProperty, EnumProperty
 
 class fast_lattice(PropertyGroup):
 
+  method = EnumProperty(
+    name = 'Conforming Method',
+    description = 'Method to use when conforming the lattice to your selection.',
+    items = [
+    # ('PLANAR', 'Planar', 'The planar method that works with all selections but is the slowest'),
+      ('BRUTE_FORCE', 'Brute Force', 'The brute force method that can work better with most selections but is much slower. (Doesn\'t always produce a better result)'),
+      ('DEFAULT', 'Default', 'The default method that works well with most selections.'),
+    ],
+    default = 'DEFAULT'
+  )
+
   accuracy = FloatProperty(
     name = 'Accuracy',
     description = 'How accurate the lattice will conform to the selection. (Increasing this value takes longer to calculate)',
     min = 0.001,
     max = 1.0,
-    default = 0.1
+    default = 0.2
   )
 
   interpolation_type = EnumProperty(
@@ -23,15 +34,4 @@ class fast_lattice(PropertyGroup):
       ('KEY_LINEAR', 'Linear', '')
     ],
     default = 'KEY_BSPLINE'
-  )
-
-  method = EnumProperty(
-    name = 'Conforming Method',
-    description = 'Method to use when conforming the lattice to your selection.',
-    items = [
-      ('DEFAULT', 'Default', 'The default method that works well with most selections.'),
-      ('SIMPLE', 'Simple', 'The simple method that works well with most selections and is the fastest. (Often produces the same result)'),
-      # ('PLANAR', 'Planar', 'The planar method that works with all selections but is the slowest')
-    ],
-    default = 'DEFAULT'
   )

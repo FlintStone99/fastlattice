@@ -132,24 +132,6 @@ class fast_lattice(Operator):
 
     if self.method in 'DEFAULT':
 
-      vector_samples = [Vector((cos(i*random()), cos(i*random()), cos(i*random()))) for i in range(0, self.samples)]
-
-      angle_samples = [(pi*0.5)*(i/(self.samples//10)) for i in range(0, self.samples//10)] if self.samples//10 >= 10 else [(pi*0.5)*(i/10) for i in range(0, 10)]
-
-      for vector in vector_samples:
-
-        for angle in angle_samples:
-
-          matrix = Matrix.Rotation(angle, 4, vector)
-          test = self.scale(coordinates, matrix)
-
-          if test < control:
-
-            control = test
-            self.minimum_matrix = matrix
-
-    elif self.method in 'SIMPLE':
-
       vector_samples = [Vector((random(), random(), random())) for _ in range(0, self.samples)]
 
       angles = [
@@ -162,7 +144,18 @@ class fast_lattice(Operator):
         0.94,
         1.1,
         1.26,
-        1.42
+        1.41,
+        1.57,
+        1.73,
+        1.88,
+        2.04,
+        2.2,
+        2.36,
+        2.51,
+        2.67,
+        2.83,
+        2.98,
+        3.14
       ]
 
       for vector in vector_samples:
@@ -176,6 +169,27 @@ class fast_lattice(Operator):
 
             control = test
             self.minimum_matrix = matrix
+
+    elif self.method in 'BRUTE_FORCE':
+
+      vector_samples = [Vector((cos(i*random()), cos(i*random()), cos(i*random()))) for i in range(0, self.samples)]
+
+      count = self.samples//10 if self.samples//10 >= 20 else 20
+
+      angle_samples = [pi*(i/count) for i in range(0, count)]
+
+      for vector in vector_samples:
+
+        for angle in angle_samples:
+
+          matrix = Matrix.Rotation(angle, 4, vector)
+          test = self.scale(coordinates, matrix)
+
+          if test < control:
+
+            control = test
+            self.minimum_matrix = matrix
+
 
     else: # planar
 
