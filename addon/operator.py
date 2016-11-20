@@ -70,7 +70,6 @@ class fast_lattice(Operator):
     object.update_from_editmode()
 
     vertices = [vertex for vertex in object.data.vertices if vertex.select]
-    # coordinates = [vertex.co for vertex in vertices]
     indices = [vertex.index for vertex in vertices]
 
     mesh = bmesh.new()
@@ -131,12 +130,6 @@ class fast_lattice(Operator):
     lattice_data.interpolation_type_w = self.interpolation_type
     lattice_data.use_outside = True
 
-    # for i in range(0, 3):
-    #
-    #   if lattice_object.dimensions[i] < 0.001:
-    #
-    #     lattice_object.dimensions[i] = 0.001
-
     return lattice_object
 
 
@@ -190,7 +183,9 @@ class fast_lattice(Operator):
 
       vector_samples = [Vector((i*factor*random(), i*factor*random(), i*factor*random())) for i in range(0, self.samples)]
 
-      angle_samples = [pi*(i*0.01) for i in range(0, 91)]
+      factor = 1/90
+
+      angle_samples = [pi*(i*factor) for i in range(0, 91)]
 
       for vector in vector_samples:
 
