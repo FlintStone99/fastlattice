@@ -95,6 +95,14 @@ class fast_lattice(Operator):
 
     lattice_object['fast-lattice'] = "{},{},{},{},{},{},{}".format(object.name, vertex_group.name, lattice_modifier.name, lattice_object.name, lattice_object.data.name, object.show_wire, object.show_all_edges)
 
+    context.scene.update()
+
+    for i in range(0, 3):
+
+      if lattice_object.dimensions[i] < 0.001:
+
+        lattice_object.dimensions[i] = 0.1
+
     object.show_wire = True
     object.show_all_edges = True
 
@@ -123,6 +131,12 @@ class fast_lattice(Operator):
     lattice_data.interpolation_type_w = self.interpolation_type
     lattice_data.use_outside = True
 
+    # for i in range(0, 3):
+    #
+    #   if lattice_object.dimensions[i] < 0.001:
+    #
+    #     lattice_object.dimensions[i] = 0.001
+
     return lattice_object
 
 
@@ -132,7 +146,7 @@ class fast_lattice(Operator):
 
     if self.method in 'DEFAULT':
 
-      vector_samples = [Vector((random(), random(), random())) for _ in range(0, self.samples)]
+      vector_samples = [Vector((random(), random(), random())) for i in range(0, self.samples)]
 
       angles = [
         0.0,
@@ -172,11 +186,11 @@ class fast_lattice(Operator):
 
     elif self.method in 'BRUTE_FORCE':
 
-      vector_samples = [Vector((cos(i*random()), cos(i*random()), cos(i*random()))) for i in range(0, self.samples)]
+      factor = 1/self.samples
 
-      count = self.samples//10 if self.samples//10 >= 20 else 20
+      vector_samples = [Vector((i*factor*random(), i*factor*random(), i*factor*random())) for i in range(0, self.samples)]
 
-      angle_samples = [pi*(i/count) for i in range(0, count)]
+      angle_samples = [pi*(i*0.01) for i in range(0, 91)]
 
       for vector in vector_samples:
 
@@ -190,6 +204,9 @@ class fast_lattice(Operator):
             control = test
             self.minimum_matrix = matrix
 
+    elif self.method == 'WORLD':
+
+      self.minimum_matrix = Matrix()
 
     else: # planar
 

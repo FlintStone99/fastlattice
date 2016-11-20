@@ -9,7 +9,8 @@ class fast_lattice(PropertyGroup):
     name = 'Conforming Method',
     description = 'Method to use when conforming the lattice to your selection.',
     items = [
-    # ('PLANAR', 'Planar', 'The planar method that works with all selections but is the slowest'),
+      ('WORLD', 'World Aligned', 'The world aligned method that only produces a lattice that fits around the selection without alignment.'),
+      # ('PLANAR', 'Planar', 'The planar method that is intended to work with flat selections.'),
       ('BRUTE_FORCE', 'Brute Force', 'The brute force method that can work better with most selections but is much slower. (Doesn\'t always produce a better result)'),
       ('DEFAULT', 'Default', 'The default method that works well with most selections.'),
     ],
