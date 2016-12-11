@@ -1,8 +1,4 @@
-
 '''
-Fast Lattice Addon
-Copyright (C) 2016 Trentin Frederick (proxe)
-
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
@@ -19,7 +15,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.
 bl_info = {
   'name': 'Fast Lattice',
   'author': 'Trentin Frederick (proxe)',
-  'version': (0, '5b', 7),
+  'version': (0, '5b', 8),
   'blender': (2, 68, 0),
   'location': '3D View \N{Rightwards Arrow} Edit Mode \N{Rightwards Arrow} Mesh Tools',
   'description': 'Quickly add and edit a lattice object that effects and conforms to the mesh selection.',
