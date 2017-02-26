@@ -1,4 +1,33 @@
-def draw_mesh(self, context):
+def operator(self, context):
+
+    layout = self.layout
+
+    object = bpy.data.objects[context.object['fast-lattice'].split(',')[0]]
+
+    row = layout.row()
+    row.prop(context.object.data, 'points_u')
+    row.prop(context.object.data, 'interpolation_type_u', text='')
+
+    row = layout.row()
+    row.prop(context.object.data, 'points_v')
+    row.prop(context.object.data, 'interpolation_type_v', text='')
+
+    row = layout.row()
+    row.prop(context.object.data, 'points_w')
+    row.prop(context.object.data, 'interpolation_type_w', text='')
+
+    row = layout.row()
+    row.prop(context.object.data, 'use_outside')
+
+    row = layout.row()
+    row.label(text='Display:')
+
+    row = layout.row()
+    row.prop(object, 'show_wire')
+    row.prop(object, 'show_all_edges')
+
+
+def panel_mesh(self, context):
 
     layout = self.layout
 
@@ -15,7 +44,7 @@ def draw_mesh(self, context):
     column.operator('object.fast_lattice')
 
 
-def draw_lattice(self, context):
+def panel_lattice(self, context):
 
     layout = self.layout
 
