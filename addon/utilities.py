@@ -135,11 +135,11 @@ class create_lattice:
 
             factor = 1/self.samples
 
-            vector_samples = [Vector((i*factor*random(), i*factor*random(), i*factor*random())) for i in range(0, self.samples)]
+            vector_samples = [Vector((index * factor * random(), index * factor * random(), index * factor * random())) for index in range(0, self.samples)]
 
             factor = 1/90
 
-            angle_samples = [pi*(i*factor) for i in range(0, 91)]
+            angle_samples = [pi * (index * factor) for index in range(0, 91)]
 
             for vector in vector_samples:
 
