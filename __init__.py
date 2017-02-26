@@ -34,8 +34,8 @@ from .addon import interface, operator, properties
 
 def register():
 
-    bpy.types.VIEW3D_PT_tools_meshedit.append(interface.draw_mesh)
-    bpy.types.VIEW3D_PT_tools_latticeedit.append(interface.draw_lattice)
+    bpy.types.VIEW3D_PT_tools_meshedit.append(interface.panel_mesh)
+    bpy.types.VIEW3D_PT_tools_latticeedit.append(interface.panel_lattice)
 
     register_module(__name__)
 
@@ -47,8 +47,8 @@ def register():
 
 def unregister():
 
-    bpy.types.VIEW3D_PT_tools_meshedit.remove(interface.draw_mesh)
-    bpy.types.VIEW3D_PT_tools_latticeedit.remove(interface.draw_lattice)
+    bpy.types.VIEW3D_PT_tools_meshedit.remove(interface.panel_mesh)
+    bpy.types.VIEW3D_PT_tools_latticeedit.remove(interface.panel_lattice)
 
     unregister_module(__name__)
 

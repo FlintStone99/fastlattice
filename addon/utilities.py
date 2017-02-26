@@ -1,10 +1,24 @@
+from math import pi
+from random import random
+
+import bpy
+import bmesh
+
+from mathutils import Vector, Matrix, Euler
+
+
 class create_lattice:
 
-    def __init__(self, operator, context)
+    samples = 1000
+    interpolation_type = None
+    method = 'DEFAULT'
+    minimum_matrix = Matrix()
 
-        operator.samples = int(operator.samples * context.window_manager.fast_lattice.accuracy)
-        operator.interpolation_type = context.window_manager.fast_lattice.interpolation_type
-        operator.method = context.window_manager.fast_lattice.method
+    def __init__(self, operator, context):
+
+        self.samples = int(self.samples * context.window_manager.fast_lattice.accuracy)
+        self.interpolation_type = context.window_manager.fast_lattice.interpolation_type
+        self.method = context.window_manager.fast_lattice.method
 
         bpy.ops.object.mode_set(mode='OBJECT')
 
