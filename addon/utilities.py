@@ -16,56 +16,59 @@ class create_lattice:
 
     def __init__(self, operator, context):
 
-        self.samples = int(self.samples * context.window_manager.fast_lattice.accuracy)
-        self.interpolation_type = context.window_manager.fast_lattice.interpolation_type
-        self.method = context.window_manager.fast_lattice.method
-
-        bpy.ops.object.mode_set(mode='OBJECT')
-
         object = context.active_object
-        object.update_from_editmode()
-
-        vertices = [vertex for vertex in object.data.vertices if vertex.select]
-        indices = [vertex.index for vertex in vertices]
-
-        mesh = bmesh.new()
-        mesh.from_mesh(object.data)
-
-        convex_hull = bmesh.ops.convex_hull(mesh, input=[vertex for vertex in mesh.verts if vertex.select], use_existing_faces=False)
-        coordinates = [vertex.co for vertex in convex_hull['geom'] if hasattr(vertex, 'co')]
-
-        vertex_group = object.vertex_groups.new(name='fast-lattice')
-        vertex_group.add(indices, 1.0, 'ADD')
-
-        lattice_object = self.add_lattice(object, coordinates)
-
-        mesh.free()
-
-        lattice_modifier = object.modifiers.new(name='fast-lattice', type='LATTICE')
-        lattice_modifier.object = lattice_object
-        lattice_modifier.vertex_group = vertex_group.name
-
-        context.scene.objects.link(object=lattice_object)
-        context.scene.objects.active = lattice_object
-
-        lattice_object['fast-lattice'] = "{},{},{},{},{},{},{}".format(object.name, vertex_group.name, lattice_modifier.name, lattice_object.name, lattice_object.data.name, object.show_wire, object.show_all_edges)
-
-        context.scene.update()
-
-        for i in range(0, 3):
-
-            if lattice_object.dimensions[i] < 0.001:
-
-                lattice_object.dimensions[i] = 0.1
-
-        object.show_wire = True
-        object.show_all_edges = True
-
-        bpy.ops.object.mode_set(mode='EDIT')
 
         if object.scale != Vector((1.0, 1.0, 1.0)):
 
-            operator.report({'WARNING'}, 'Object is scaled; results are incorrect.')
+            operator.report({'WARNING'}, '\'{}\' is scaled: canceling.'.format(object.name))
+
+        else:
+
+            self.samples = int(self.samples * context.window_manager.fast_lattice.accuracy)
+            self.interpolation_type = context.window_manager.fast_lattice.interpolation_type
+            self.method = context.window_manager.fast_lattice.method
+
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+            object.update_from_editmode()
+
+            vertices = [vertex for vertex in object.data.vertices if vertex.select]
+            indices = [vertex.index for vertex in vertices]
+
+            mesh = bmesh.new()
+            mesh.from_mesh(object.data)
+
+            convex_hull = bmesh.ops.convex_hull(mesh, input=[vertex for vertex in mesh.verts if vertex.select], use_existing_faces=False)
+            coordinates = [vertex.co for vertex in convex_hull['geom'] if hasattr(vertex, 'co')]
+
+            vertex_group = object.vertex_groups.new(name='fast-lattice')
+            vertex_group.add(indices, 1.0, 'ADD')
+
+            lattice_object = self.add_lattice(object, coordinates)
+
+            mesh.free()
+
+            lattice_modifier = object.modifiers.new(name='fast-lattice', type='LATTICE')
+            lattice_modifier.object = lattice_object
+            lattice_modifier.vertex_group = vertex_group.name
+
+            context.scene.objects.link(object=lattice_object)
+            context.scene.objects.active = lattice_object
+
+            lattice_object['fast-lattice'] = "{},{},{},{},{},{},{}".format(object.name, vertex_group.name, lattice_modifier.name, lattice_object.name, lattice_object.data.name, object.show_wire, object.show_all_edges)
+
+            context.scene.update()
+
+            for i in range(0, 3):
+
+                if lattice_object.dimensions[i] < 0.001:
+
+                    lattice_object.dimensions[i] = 0.1
+
+            object.show_wire = True if operator.show_wire else False
+            object.show_all_edges = True if operator.show_all_edges else False
+
+            bpy.ops.object.mode_set(mode='EDIT')
 
 
     def add_lattice(self, object, coordinates):
@@ -234,3 +237,9 @@ def cleanup(context):
     bpy.data.lattices.remove(lattice=bpy.data.lattices[prop[4]], do_unlink=True)
 
     bpy.ops.object.mode_set(mode='EDIT')
+
+
+def update(operator, context):
+
+    bpy.data.objects[operator.mesh_object].show_wire = operator.show_wire
+    bpy.data.objects[operator.mesh_object].show_all_edges = operator.show_all_edges

@@ -1,35 +1,39 @@
-def operator(self, context):
+import bpy
 
-    layout = self.layout
+def operator(operator, context):
 
-    object = bpy.data.objects[context.object['fast-lattice'].split(',')[0]]
+    layout = operator.layout
 
-    row = layout.row()
-    row.prop(context.object.data, 'points_u')
-    row.prop(context.object.data, 'interpolation_type_u', text='')
+    object = context.object if 'fast-lattice' in context.object else None
 
-    row = layout.row()
-    row.prop(context.object.data, 'points_v')
-    row.prop(context.object.data, 'interpolation_type_v', text='')
+    if object:
 
-    row = layout.row()
-    row.prop(context.object.data, 'points_w')
-    row.prop(context.object.data, 'interpolation_type_w', text='')
+        row = layout.row()
+        row.prop(context.object.data, 'points_u')
+        row.prop(context.object.data, 'interpolation_type_u', text='')
 
-    row = layout.row()
-    row.prop(context.object.data, 'use_outside')
+        row = layout.row()
+        row.prop(context.object.data, 'points_v')
+        row.prop(context.object.data, 'interpolation_type_v', text='')
 
-    row = layout.row()
-    row.label(text='Display:')
+        row = layout.row()
+        row.prop(context.object.data, 'points_w')
+        row.prop(context.object.data, 'interpolation_type_w', text='')
 
-    row = layout.row()
-    row.prop(object, 'show_wire')
-    row.prop(object, 'show_all_edges')
+        row = layout.row()
+        row.prop(context.object.data, 'use_outside')
+
+        row = layout.row()
+        row.label(text='Display:')
+
+        row = layout.row()
+        row.prop(operator, 'show_wire')
+        row.prop(operator, 'show_all_edges')
 
 
-def panel_mesh(self, context):
+def panel_mesh(panel, context):
 
-    layout = self.layout
+    layout = panel.layout
 
     column = layout.column(align=True)
 
@@ -44,9 +48,9 @@ def panel_mesh(self, context):
     column.operator('object.fast_lattice')
 
 
-def panel_lattice(self, context):
+def panel_lattice(panel, context):
 
-    layout = self.layout
+    layout = panel.layout
 
     if context.object.get('fast-lattice'):
 

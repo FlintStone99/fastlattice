@@ -1,15 +1,37 @@
 import bpy
 
 from bpy.types import Operator
+from bpy.props import BoolProperty, StringProperty
 
 from . import interface, utilities
+from .config import defaults as default
 
 
 class fast_lattice(Operator):
     bl_idname = 'object.fast_lattice'
     bl_label = 'Create Lattice'
-    bl_description = 'Create and edit a lattice that effects and conforms to the selection.'
+    bl_description = 'Create and edit a lattice that effects and conforms to the selection'
     bl_options = {'REGISTER', 'UNDO'}
+
+    show_wire = BoolProperty(
+        name = 'Wire',
+        description = 'Add the object(s) wireframe over solid drawing',
+        update = utilities.update,
+        default = default['show_wire']
+    )
+
+    show_all_edges = BoolProperty(
+        name = 'Draw All Edges',
+        description = 'Draw all edges for mesh objects',
+        update = utilities.update,
+        default = default['show_all_edges']
+    )
+
+    mesh_object = StringProperty(
+        name = 'Mesh Object',
+        description = 'Used internally to store the name of the mesh object',
+        default = ''
+    )
 
 
     @classmethod
@@ -24,6 +46,8 @@ class fast_lattice(Operator):
 
 
     def execute(self, context):
+
+        self.mesh_object = context.object.name
 
         utilities.create_lattice(self, context)
 
