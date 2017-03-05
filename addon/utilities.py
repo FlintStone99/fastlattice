@@ -7,7 +7,8 @@ import bmesh
 from mathutils import Vector, Matrix, Euler
 
 
-class create_lattice:
+class lattice:
+
 
     samples = 1000
     interpolation_type = None
@@ -94,47 +95,47 @@ class create_lattice:
 
         control = self.scale(coordinates, Matrix())
 
-        if self.method in 'DEFAULT':
+        # if self.method in 'DEFAULT':
+        #
+        #     vector_samples = [Vector((random(), random(), random())) for i in range(0, self.samples)]
+        #
+        #     angles = [
+        #         0.0,
+        #         0.16,
+        #         0.31,
+        #         0.47,
+        #         0.63,
+        #         0.79,
+        #         0.94,
+        #         1.1,
+        #         1.26,
+        #         1.41,
+        #         1.57,
+        #         1.73,
+        #         1.88,
+        #         2.04,
+        #         2.2,
+        #         2.36,
+        #         2.51,
+        #         2.67,
+        #         2.83,
+        #         2.98,
+        #         3.14
+        #     ]
+        #
+        #     for vector in vector_samples:
+        #
+        #         for angle in angles:
+        #
+        #             matrix = Matrix.Rotation(angle, 4, vector)
+        #             test = self.scale(coordinates, matrix)
+        #
+        #             if test < control:
+        #
+        #                 control = test
+        #                 self.minimum_matrix = matrix
 
-            vector_samples = [Vector((random(), random(), random())) for i in range(0, self.samples)]
-
-            angles = [
-                0.0,
-                0.16,
-                0.31,
-                0.47,
-                0.63,
-                0.79,
-                0.94,
-                1.1,
-                1.26,
-                1.41,
-                1.57,
-                1.73,
-                1.88,
-                2.04,
-                2.2,
-                2.36,
-                2.51,
-                2.67,
-                2.83,
-                2.98,
-                3.14
-            ]
-
-            for vector in vector_samples:
-
-                for angle in angles:
-
-                    matrix = Matrix.Rotation(angle, 4, vector)
-                    test = self.scale(coordinates, matrix)
-
-                    if test < control:
-
-                        control = test
-                        self.minimum_matrix = matrix
-
-        elif self.method in 'BRUTE_FORCE':
+        if self.method in 'ALIGN':
 
             factor = 1/self.samples
 
@@ -242,4 +243,4 @@ def cleanup(context):
 def update(operator, context):
 
     bpy.data.objects[operator.mesh_object].show_wire = operator.show_wire
-    bpy.data.objects[operator.mesh_object].show_all_edges = operator.show_all_edges
+    bpy.data.objects[operator.mesh_object].show_all_edges = operator.show_all_edgesZ

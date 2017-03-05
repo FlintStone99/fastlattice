@@ -41,10 +41,12 @@ def panel_mesh(panel, context):
 
     column.prop(context.window_manager.fast_lattice, 'method', text='')
 
+    # column.separator()
     column.prop(context.window_manager.fast_lattice, 'interpolation_type', text='')
 
     column.prop(context.window_manager.fast_lattice, 'accuracy', slider=True)
 
+    # column.separator()
     column.operator('object.fast_lattice')
 
 

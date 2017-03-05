@@ -3,8 +3,8 @@ import bpy
 from bpy.types import Operator
 from bpy.props import BoolProperty, StringProperty
 
-from . import interface, utilities
 from .config import defaults as default
+from . import utilities
 
 
 class fast_lattice(Operator):
@@ -49,7 +49,7 @@ class fast_lattice(Operator):
 
         self.mesh_object = context.object.name
 
-        utilities.create_lattice(self, context)
+        utilities.lattice(self, context)
 
         return {'FINISHED'}
 
