@@ -37,7 +37,7 @@ class fast_lattice(Operator):
     @classmethod
     def poll(cls, context):
 
-        return context.object.type == 'MESH' and context.object.mode == 'EDIT' and context.object.data.total_vert_sel > 2 and not context.area.spaces.active.local_view
+        return context.object and context.object.type == 'MESH' and context.object.mode == 'EDIT' and context.object.data.total_vert_sel > 2 and not context.area.spaces.active.local_view or context.object and context.object.type == 'MESH' and context.object.mode == 'OBJECT'
 
 
     def draw(self, context):

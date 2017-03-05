@@ -31,7 +31,7 @@ def operator(operator, context):
         row.prop(operator, 'show_all_edges')
 
 
-def panel_mesh(panel, context):
+def panel_start(panel, context):
 
     layout = panel.layout
 
@@ -40,17 +40,13 @@ def panel_mesh(panel, context):
     column.label(text='Fast Lattice:')
 
     column.prop(context.window_manager.fast_lattice, 'method', text='')
-
-    # column.separator()
     column.prop(context.window_manager.fast_lattice, 'interpolation_type', text='')
-
     column.prop(context.window_manager.fast_lattice, 'accuracy', slider=True)
 
-    # column.separator()
     column.operator('object.fast_lattice')
 
 
-def panel_lattice(panel, context):
+def panel_finish(panel, context):
 
     layout = panel.layout
 

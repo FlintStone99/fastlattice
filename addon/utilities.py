@@ -12,12 +12,12 @@ class lattice:
 
     samples = 1000
     interpolation_type = None
-    method = 'DEFAULT'
+    method = 'ALIGN'
     minimum_matrix = Matrix()
 
     def __init__(self, operator, context):
 
-        object = context.active_object
+        origin_active_object = context.active_object
 
         self.samples = int(self.samples * context.window_manager.fast_lattice.accuracy)
         self.interpolation_type = context.window_manager.fast_lattice.interpolation_type
@@ -25,32 +25,81 @@ class lattice:
 
         bpy.ops.object.mode_set(mode='OBJECT')
 
-        object.update_from_editmode()
+        if origin_active_object.mode == 'OBJECT':
 
-        vertices = [vertex for vertex in object.data.vertices if vertex.select]
-        indices = [vertex.index for vertex in vertices]
+            for object in context.selected_objects:
+
+                if object.type == 'MESH':
+
+                    object.update_from_editmode()
+        else:
+
+            origin_active_object.update_from_editmode()
+
+        context.scene.update()
+
+        # vertices = [(vertex, context.object.matrix_world * vertex.co) for vertex in context.object.data.vertices if vertex.select] if context.object.mode == 'EDIT' else [(vertex, object.matrix_world * vertex.co) for vertex in object.data.vertices for object in [object for object in context.selected_objects if object.type == 'MESH']]
+        if origin_active_object.mode == 'EDIT':
+            vertices = [(vertex, origin_active_object.matrix_world * vertex.co) for vertex in origin_active_object.data.vertices if vertex.select]
+        else:
+            vertices = []
+            for object in context.selected_objects:
+                vertices += [(vertex, origin_active_object.matrix_world * vertex.co) for vertex in origin_active_object.data.vertices]
+                if object != origin_active_object:
+                    vertices += [(vertex, object.matrix_world * vertex.co) for vertex in object.data.vertices]
+        indices = [vertex[0].index for vertex in vertices] if origin_active_object.mode == 'EDIT' else []
+
+        if origin_active_object.mode == 'OBJECT':
+
+            data = bpy.data.meshes.new(name='point_data')
+            data.from_pydata(vertices=[vertex[1] for vertex in vertices], edges=[], faces=[])
+            object = bpy.data.objects.new(name='point_data', object_data=data)
+            context.scene.objects.link(object)
+            object.update_from_editmode()
+
+        else:
+
+            data = bpy.data.meshes.new(name='point_data')
+            data.from_pydata(vertices=[vertex[1] for vertex in vertices], edges=[], faces=[])
+            object = bpy.data.objects.new(name='point_data', object_data=data)
+            context.scene.objects.link(object)
+            object.update_from_editmode()
 
         mesh = bmesh.new()
-        mesh.from_mesh(object.data)
+        mesh.from_mesh(data)
 
-        convex_hull = bmesh.ops.convex_hull(mesh, input=[vertex for vertex in mesh.verts if vertex.select], use_existing_faces=False)
-        coordinates = [object.matrix_world * vertex.co for vertex in convex_hull['geom'] if hasattr(vertex, 'co')]
+        convex_hull = bmesh.ops.convex_hull(mesh, input=[vertex for vertex in mesh.verts if vertex.select] if origin_active_object.mode == 'EDIT' else [vertex for vertex in mesh.verts], use_existing_faces=False)
+        coordinates = [vertex.co for vertex in convex_hull['geom'] if hasattr(vertex, 'co')]
 
-        vertex_group = object.vertex_groups.new(name='fast-lattice')
-        vertex_group.add(indices, 1.0, 'ADD')
+        if origin_active_object.mode == 'EDIT':
 
-        lattice_object = self.add_lattice(object, coordinates)
+            vertex_group = origin_active_object.vertex_groups.new(name='fast-lattice')
+            vertex_group.add(indices, 1.0, 'ADD')
+
+        lattice_object = self.add_lattice(coordinates)
 
         mesh.free()
+        bpy.data.objects.remove(object, do_unlink=True)
+        bpy.data.meshes.remove(data, do_unlink=True)
 
-        lattice_modifier = object.modifiers.new(name='fast-lattice', type='LATTICE')
-        lattice_modifier.object = lattice_object
-        lattice_modifier.vertex_group = vertex_group.name
+        if origin_active_object.mode == 'OBJECT':
+
+            for object in context.selected_objects:
+
+                if object.type == 'MESH':
+
+                    lattice_modifier = object.modifiers.new(name='fast-lattice', type='LATTICE')
+                    lattice_modifier.object = lattice_object
+        else:
+
+            lattice_modifier = object.modifiers.new(name='fast-lattice', type='LATTICE')
+            lattice_modifier.object = lattice_object
+            lattice_modifier.vertex_group = vertex_group.name
 
         context.scene.objects.link(object=lattice_object)
         context.scene.objects.active = lattice_object
 
-        lattice_object['fast-lattice'] = "{},{},{},{},{},{},{}".format(object.name, vertex_group.name, lattice_modifier.name, lattice_object.name, lattice_object.data.name, object.show_wire, object.show_all_edges)
+        lattice_object['fast-lattice'] = "{}:{}:{}:{}:{}:{}:{}:{}:{}".format(object.name if origin_active_object.mode == 'EDIT' else [object.name for object in context.selected_objects if object.type == 'MESH'], vertex_group.name if origin_active_object.mode == 'EDIT' else None, lattice_modifier.name, lattice_object.name, lattice_object.data.name, object.show_wire if origin_active_object.mode == 'EDIT' else [object.show_wire for object in context.selected_objects if object.type == 'MESH'], object.show_all_edges if origin_active_object.mode == 'EDIT' else [object.show_all_edges for object in context.selected_objects if object.type == 'MESH'], origin_active_object.name, origin_active_object.mode)
 
         context.scene.update()
 
@@ -60,18 +109,15 @@ class lattice:
 
                 lattice_object.dimensions[i] = 0.1
 
-        object.show_wire = True if operator.show_wire else False
-        object.show_all_edges = True if operator.show_all_edges else False
-
         bpy.ops.object.mode_set(mode='EDIT')
 
 
-    def add_lattice(self, object, coordinates):
+    def add_lattice(self, coordinates):
 
         lattice_data = bpy.data.lattices.new(name='fast-lattice')
         lattice_object = bpy.data.objects.new(name='fast-lattice', object_data=lattice_data)
 
-        lattice_object.rotation_euler = self.rotation(object, coordinates).to_euler()
+        lattice_object.rotation_euler = self.rotation(coordinates).to_euler()
         lattice_object.location = self.location(coordinates)
         lattice_object.scale = self.scale(coordinates, self.minimum_matrix)
 
@@ -85,49 +131,9 @@ class lattice:
         return lattice_object
 
 
-    def rotation(self, object, coordinates):
+    def rotation(self, coordinates):
 
         control = self.scale(coordinates, Matrix())
-
-        # if self.method in 'DEFAULT':
-        #
-        #     vector_samples = [Vector((random(), random(), random())) for i in range(0, self.samples)]
-        #
-        #     angles = [
-        #         0.0,
-        #         0.16,
-        #         0.31,
-        #         0.47,
-        #         0.63,
-        #         0.79,
-        #         0.94,
-        #         1.1,
-        #         1.26,
-        #         1.41,
-        #         1.57,
-        #         1.73,
-        #         1.88,
-        #         2.04,
-        #         2.2,
-        #         2.36,
-        #         2.51,
-        #         2.67,
-        #         2.83,
-        #         2.98,
-        #         3.14
-        #     ]
-        #
-        #     for vector in vector_samples:
-        #
-        #         for angle in angles:
-        #
-        #             matrix = Matrix.Rotation(angle, 4, vector)
-        #             test = self.scale(coordinates, matrix)
-        #
-        #             if test < control:
-        #
-        #                 control = test
-        #                 self.minimum_matrix = matrix
 
         if self.method in 'ALIGN':
 
@@ -211,30 +217,42 @@ def cleanup(context):
 
     bpy.ops.object.mode_set(mode='OBJECT')
 
-    prop = context.object['fast-lattice'].split(',')
+    prop = context.object['fast-lattice'].split(':')
 
-    object = bpy.data.objects[prop[0]]
-    lattice = bpy.data.objects[prop[3]]
+    for index, object_name in enumerate(list(prop[0].strip('[]').split(', '))):
+        context.scene.objects.active = bpy.data.objects[object_name[1:-1]]
+        context.active_object.show_wire = True if list(prop[5])[index] == 'True' else False
+        context.active_object.show_all_edges = True if list(prop[6])[index] == 'True' else False
+        bpy.ops.object.modifier_apply(apply_as='DATA', modifier=context.active_object.modifiers[prop[2]].name)
 
-    show_wire = prop[5]
-    show_all_edges = prop[6]
+    context.scene.objects.active = bpy.data.objects[prop[7]]
 
-    object.show_wire = True if show_wire == 'True' else False
-    object.show_all_edges = True if show_all_edges == 'True' else False
+    if len(prop[0]) == 1:
+        context.active_object.vertex_groups.remove(group=context.active_object.vertex_groups[prop[1]])
 
-    context.scene.objects.active = object
-
-    bpy.ops.object.modifier_apply(apply_as='DATA', modifier=object.modifiers[prop[2]].name)
-
-    object.vertex_groups.remove(group=object.vertex_groups[prop[1]])
-
-    bpy.data.objects.remove(object=lattice, do_unlink=True)
+    bpy.data.objects.remove(object=bpy.data.objects[prop[3]], do_unlink=True)
     bpy.data.lattices.remove(lattice=bpy.data.lattices[prop[4]], do_unlink=True)
 
-    bpy.ops.object.mode_set(mode='EDIT')
+
+    # object = bpy.data.objects[prop[0]]
+    # lattice = bpy.data.objects[prop[3]]
+    #
+    # show_wire = prop[5]
+    # show_all_edges = prop[6]
+    #
+    # object.show_wire = True if show_wire == 'True' else False
+    # object.show_all_edges = True if show_all_edges == 'True' else False
+    #
+    # context.scene.objects.active = object
+    #
+    # bpy.ops.object.modifier_apply(apply_as='DATA', modifier=object.modifiers[prop[2]].name)
+
+
+    bpy.ops.object.mode_set(mode=prop[8])
 
 
 def update(operator, context):
 
-    bpy.data.objects[operator.mesh_object].show_wire = operator.show_wire
-    bpy.data.objects[operator.mesh_object].show_all_edges = operator.show_all_edgesZ
+    for object in context.selected_objects:
+        object.show_wire = operator.show_wire
+        object.show_all_edges = operator.show_all_edges

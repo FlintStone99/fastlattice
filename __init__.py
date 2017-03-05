@@ -15,7 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 bl_info = {
     'name': 'Fast Lattice',
     'author': 'Trentin Frederick (proxe)',
-    'version': (0, '6a', 19),
+    'version': (0, '6a', 20),
     'blender': (2, 68, 0),
     'location': '3D View \N{Rightwards Arrow} Toolshelf \N{Rightwards Arrow} Edit/Mesh Tools/Lattice Tools',
     'description': 'Quickly add and edit a lattice object that effects and conforms to the selection.',
@@ -34,8 +34,9 @@ from .addon import interface, operator, properties
 
 def register():
 
-    bpy.types.VIEW3D_PT_tools_meshedit.append(interface.panel_mesh)
-    bpy.types.VIEW3D_PT_tools_latticeedit.append(interface.panel_lattice)
+    bpy.types.VIEW3D_PT_tools_meshedit.append(interface.panel_start)
+    bpy.types.VIEW3D_PT_tools_object.append(interface.panel_start)
+    bpy.types.VIEW3D_PT_tools_latticeedit.append(interface.panel_finish)
 
     register_module(__name__)
 
@@ -47,8 +48,9 @@ def register():
 
 def unregister():
 
-    bpy.types.VIEW3D_PT_tools_meshedit.remove(interface.panel_mesh)
-    bpy.types.VIEW3D_PT_tools_latticeedit.remove(interface.panel_lattice)
+    bpy.types.VIEW3D_PT_tools_meshedit.remove(interface.panel_start)
+    bpy.types.VIEW3D_PT_tools_object.remove(interface.panel_start)
+    bpy.types.VIEW3D_PT_tools_latticeedit.remove(interface.panel_finish)
 
     unregister_module(__name__)
 
