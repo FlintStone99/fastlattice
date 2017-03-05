@@ -1,4 +1,4 @@
-from math import pi
+from math import radians
 from random import random
 
 import bpy
@@ -17,6 +17,7 @@ class lattice:
 
     def __init__(self, operator, context):
 
+        # TODO: optimize/cleanup
         origin_active_object = context.active_object
         origin_mode = origin_active_object.mode
 
@@ -39,7 +40,6 @@ class lattice:
 
         context.scene.update()
 
-        # vertices = [(vertex, context.object.matrix_world * vertex.co) for vertex in context.object.data.vertices if vertex.select] if context.object.mode == 'EDIT' else [(vertex, object.matrix_world * vertex.co) for vertex in object.data.vertices for object in [object for object in context.selected_objects if object.type == 'MESH']]
         if origin_mode == 'EDIT':
             vertices = [(vertex, origin_active_object.matrix_world * vertex.co) for vertex in origin_active_object.data.vertices if vertex.select]
             indices = [vertex[0].index for vertex in vertices]
@@ -137,15 +137,10 @@ class lattice:
 
         control = self.scale(coordinates, self.minimum_matrix)
 
-        if self.method in 'ALIGN':
+        if self.method != 'WORLD':
 
-            factor = 1/self.samples
-
-            vector_samples = [Vector((index * factor * random(), index * factor * random(), index * factor * random())) for index in range(0, self.samples)]
-
-            factor = 1/90
-
-            angle_samples = [pi * (index * factor) for index in range(0, 91)]
+            vector_samples = [Vector((sample * 0.1 * random(), sample * 0.1 * random(), sample * 0.1 * random())) for sample in range(0, 10)]
+            angle_samples = [radians(angle) for angle in range(0, 180)]
 
             for vector in vector_samples:
 
@@ -159,13 +154,20 @@ class lattice:
                         control = test
                         self.minimum_matrix = matrix
 
-        elif self.method == 'WORLD':
+            vector_factor = 1/self.samples
+            vector_samples = [Vector((sample * vector_factor * random(), sample * vector_factor * random(), sample * vector_factor * random())) for sample in range(0, self.samples)]
 
-            self.minimum_matrix = Matrix()
+            for sample in vector_samples:
 
-        else: # planar
+                for angle in angle_samples:
 
-            pass
+                    matrix = Matrix.Rotation(angle, 4, sample)
+                    test = self.scale(coordinates, matrix)
+
+                    if test < control:
+
+                        control = test
+                        self.minimum_matrix = matrix
 
         return self.minimum_matrix.inverted()
 
@@ -234,21 +236,6 @@ def cleanup(context):
 
     bpy.data.objects.remove(object=bpy.data.objects[prop[3]], do_unlink=True)
     bpy.data.lattices.remove(lattice=bpy.data.lattices[prop[4]], do_unlink=True)
-
-
-    # object = bpy.data.objects[prop[0]]
-    # lattice = bpy.data.objects[prop[3]]
-    #
-    # show_wire = prop[5]
-    # show_all_edges = prop[6]
-    #
-    # object.show_wire = True if show_wire == 'True' else False
-    # object.show_all_edges = True if show_all_edges == 'True' else False
-    #
-    # context.scene.objects.active = object
-    #
-    # bpy.ops.object.modifier_apply(apply_as='DATA', modifier=object.modifiers[prop[2]].name)
-
 
     bpy.ops.object.mode_set(mode=prop[8])
 
