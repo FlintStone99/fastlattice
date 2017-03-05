@@ -4,7 +4,7 @@ from bpy.types import Operator
 from bpy.props import BoolProperty, StringProperty
 
 from .config import defaults as default
-from . import utilities
+from . import interface, utilities
 
 
 class fast_lattice(Operator):
