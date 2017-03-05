@@ -77,6 +77,7 @@ class lattice:
             vertex_group = origin_active_object.vertex_groups.new(name='fast-lattice')
             vertex_group.add(indices, 1.0, 'ADD')
 
+        self.minimum_matrix = object.matrix_world
         lattice_object = self.add_lattice(coordinates)
 
         mesh.free()
@@ -134,7 +135,7 @@ class lattice:
 
     def rotation(self, coordinates):
 
-        control = self.scale(coordinates, Matrix())
+        control = self.scale(coordinates, self.minimum_matrix)
 
         if self.method in 'ALIGN':
 

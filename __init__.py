@@ -15,7 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 bl_info = {
     'name': 'Fast Lattice',
     'author': 'Trentin Frederick (proxe)',
-    'version': (0, '6a', 22),
+    'version': (0, '6a', 23),
     'blender': (2, 68, 0),
     'location': '3D View \N{Rightwards Arrow} Toolshelf \N{Rightwards Arrow} Edit/Mesh Tools/Lattice Tools',
     'description': 'Quickly add and edit a lattice object that effects and conforms to the selection.',
