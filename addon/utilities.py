@@ -139,23 +139,8 @@ class lattice:
 
         if self.method != 'WORLD':
 
-            vector_samples = [Vector((sample * 0.1 * random(), sample * 0.1 * random(), sample * 0.1 * random())) for sample in range(0, 10)]
             angle_samples = [radians(angle) for angle in range(0, 180)]
-
-            for vector in vector_samples:
-
-                for angle in angle_samples:
-
-                    matrix = Matrix.Rotation(angle, 4, vector)
-                    test = self.scale(coordinates, matrix)
-
-                    if test < control:
-
-                        control = test
-                        self.minimum_matrix = matrix
-
-            vector_factor = 1/self.samples
-            vector_samples = [Vector((sample * vector_factor * random(), sample * vector_factor * random(), sample * vector_factor * random())) for sample in range(0, self.samples)]
+            vector_samples = [Vector((sample * 0.1 * random(), sample * 0.1 * random(), sample * 0.1 * random())) for sample in range(0, 10)]
 
             for sample in vector_samples:
 
@@ -168,6 +153,22 @@ class lattice:
 
                         control = test
                         self.minimum_matrix = matrix
+
+            for _ in range(int(self.samples*0.1)):
+
+                vector_samples = [Vector((sample * 0.1 * random(), sample * 0.1 * random(), sample * 0.1 * random())) for sample in range(0, 10)]
+
+                for sample in vector_samples:
+
+                    for angle in angle_samples:
+
+                        matrix = Matrix.Rotation(angle, 4, sample)
+                        test = self.scale(coordinates, matrix)
+
+                        if test < control:
+
+                            control = test
+                            self.minimum_matrix = matrix
 
         return self.minimum_matrix.inverted()
 
@@ -243,5 +244,6 @@ def cleanup(context):
 def update(operator, context):
 
     for object in context.selected_objects:
-        object.show_wire = operator.show_wire
-        object.show_all_edges = operator.show_all_edges
+        if object.type == 'MESH':
+            object.show_wire = operator.show_wire
+            object.show_all_edges = operator.show_all_edges

@@ -37,16 +37,3 @@ class fast_lattice(PropertyGroup):
         ],
         default = default['interpolation_type']
     )
-
-    place_first = BoolProperty(
-        name = 'Place at top',
-        description = 'Place the lattice modifier at the top of the modifier stack',
-        default = default['place_first']
-    )
-
-
-    keep_modifier = BoolProperty(
-        name = 'Keep',
-        description = 'Keep the modifier(s) when the finished',
-        default = default['keep_modifier']
-    )

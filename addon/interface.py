@@ -38,7 +38,6 @@ def panel_start(panel, context):
     column = layout.column(align=True)
 
     column.label(text='Fast Lattice:')
-
     column.prop(context.window_manager.fast_lattice, 'method', text='')
     column.prop(context.window_manager.fast_lattice, 'interpolation_type', text='')
     column.prop(context.window_manager.fast_lattice, 'accuracy', slider=True)
@@ -50,10 +49,9 @@ def panel_finish(panel, context):
 
     layout = panel.layout
 
-    if context.object.get('fast-lattice'):
+    if 'fast-lattice' in context.object:
 
         column = layout.column(align=True)
 
         column.label(text='Fast Lattice:')
-
         column.operator('object.fast_lattice_cleanup')

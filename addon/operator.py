@@ -27,13 +27,6 @@ class fast_lattice(Operator):
         default = default['show_all_edges']
     )
 
-    mesh_object = StringProperty(
-        name = 'Mesh Object',
-        description = 'Used internally to store the name of the mesh object',
-        default = ''
-    )
-
-
     @classmethod
     def poll(cls, context):
 
