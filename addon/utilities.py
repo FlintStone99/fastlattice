@@ -19,57 +19,51 @@ class lattice:
 
         object = context.active_object
 
-        if object.scale != Vector((1.0, 1.0, 1.0)):
+        self.samples = int(self.samples * context.window_manager.fast_lattice.accuracy)
+        self.interpolation_type = context.window_manager.fast_lattice.interpolation_type
+        self.method = context.window_manager.fast_lattice.method
 
-            operator.report({'WARNING'}, '\'{}\' is scaled: canceling.'.format(object.name))
+        bpy.ops.object.mode_set(mode='OBJECT')
 
-        else:
+        object.update_from_editmode()
 
-            self.samples = int(self.samples * context.window_manager.fast_lattice.accuracy)
-            self.interpolation_type = context.window_manager.fast_lattice.interpolation_type
-            self.method = context.window_manager.fast_lattice.method
+        vertices = [vertex for vertex in object.data.vertices if vertex.select]
+        indices = [vertex.index for vertex in vertices]
 
-            bpy.ops.object.mode_set(mode='OBJECT')
+        mesh = bmesh.new()
+        mesh.from_mesh(object.data)
 
-            object.update_from_editmode()
+        convex_hull = bmesh.ops.convex_hull(mesh, input=[vertex for vertex in mesh.verts if vertex.select], use_existing_faces=False)
+        coordinates = [object.matrix_world * vertex.co for vertex in convex_hull['geom'] if hasattr(vertex, 'co')]
 
-            vertices = [vertex for vertex in object.data.vertices if vertex.select]
-            indices = [vertex.index for vertex in vertices]
+        vertex_group = object.vertex_groups.new(name='fast-lattice')
+        vertex_group.add(indices, 1.0, 'ADD')
 
-            mesh = bmesh.new()
-            mesh.from_mesh(object.data)
+        lattice_object = self.add_lattice(object, coordinates)
 
-            convex_hull = bmesh.ops.convex_hull(mesh, input=[vertex for vertex in mesh.verts if vertex.select], use_existing_faces=False)
-            coordinates = [vertex.co for vertex in convex_hull['geom'] if hasattr(vertex, 'co')]
+        mesh.free()
 
-            vertex_group = object.vertex_groups.new(name='fast-lattice')
-            vertex_group.add(indices, 1.0, 'ADD')
+        lattice_modifier = object.modifiers.new(name='fast-lattice', type='LATTICE')
+        lattice_modifier.object = lattice_object
+        lattice_modifier.vertex_group = vertex_group.name
 
-            lattice_object = self.add_lattice(object, coordinates)
+        context.scene.objects.link(object=lattice_object)
+        context.scene.objects.active = lattice_object
 
-            mesh.free()
+        lattice_object['fast-lattice'] = "{},{},{},{},{},{},{}".format(object.name, vertex_group.name, lattice_modifier.name, lattice_object.name, lattice_object.data.name, object.show_wire, object.show_all_edges)
 
-            lattice_modifier = object.modifiers.new(name='fast-lattice', type='LATTICE')
-            lattice_modifier.object = lattice_object
-            lattice_modifier.vertex_group = vertex_group.name
+        context.scene.update()
 
-            context.scene.objects.link(object=lattice_object)
-            context.scene.objects.active = lattice_object
+        for i in range(0, 3):
 
-            lattice_object['fast-lattice'] = "{},{},{},{},{},{},{}".format(object.name, vertex_group.name, lattice_modifier.name, lattice_object.name, lattice_object.data.name, object.show_wire, object.show_all_edges)
+            if lattice_object.dimensions[i] < 0.001:
 
-            context.scene.update()
+                lattice_object.dimensions[i] = 0.1
 
-            for i in range(0, 3):
+        object.show_wire = True if operator.show_wire else False
+        object.show_all_edges = True if operator.show_all_edges else False
 
-                if lattice_object.dimensions[i] < 0.001:
-
-                    lattice_object.dimensions[i] = 0.1
-
-            object.show_wire = True if operator.show_wire else False
-            object.show_all_edges = True if operator.show_all_edges else False
-
-            bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.object.mode_set(mode='EDIT')
 
 
     def add_lattice(self, object, coordinates):
@@ -77,8 +71,8 @@ class lattice:
         lattice_data = bpy.data.lattices.new(name='fast-lattice')
         lattice_object = bpy.data.objects.new(name='fast-lattice', object_data=lattice_data)
 
-        lattice_object.rotation_euler = (object.matrix_world.to_quaternion().to_matrix().to_4x4() * self.rotation(object, coordinates)).to_euler()
-        lattice_object.location = object.matrix_world * self.location(coordinates)
+        lattice_object.rotation_euler = self.rotation(object, coordinates).to_euler()
+        lattice_object.location = self.location(coordinates)
         lattice_object.scale = self.scale(coordinates, self.minimum_matrix)
 
         lattice_object.show_x_ray = True
