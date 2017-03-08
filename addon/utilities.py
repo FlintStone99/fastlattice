@@ -9,7 +9,6 @@ from mathutils import Vector, Matrix, Euler
 
 class lattice:
 
-
     samples = 1000
     interpolation_type = None
     method = 'ALIGN'
@@ -17,7 +16,7 @@ class lattice:
 
     def __init__(self, operator, context):
 
-        # TODO: optimize/cleanup
+        # TODO: optimize/cleanup oop; this is a direct conversion from edit mode support and has not been optimized for latest features
         origin_active_object = context.active_object
         origin_mode = origin_active_object.mode
 
@@ -181,7 +180,7 @@ class lattice:
         y = [vertex.y for vertex in vertices]
         z = [vertex.z for vertex in vertices]
 
-        return self.minimum_matrix.inverted() * (sum(self.box(x, y, z), Vector()) / len(self.box(x, y, z)))
+        return self.minimum_matrix.inverted() * (sum(self.bounds(x, y, z), Vector()) / len(self.bounds(x, y, z)))
 
 
     @staticmethod
@@ -200,9 +199,9 @@ class lattice:
 
 
     @staticmethod
-    def box(x, y, z):
+    def bounds(x, y, z):
 
-        bounds = [
+        return [
             Vector((min(x), min(y), min(z))),
             Vector((min(x), min(y), max(z))),
 
@@ -215,8 +214,6 @@ class lattice:
             Vector((max(x), max(y), min(z))),
             Vector((max(x), max(y), max(z))),
         ]
-
-        return bounds
 
 def cleanup(context):
 
