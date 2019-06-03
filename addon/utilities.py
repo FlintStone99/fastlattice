@@ -37,24 +37,24 @@ class lattice:
 
             origin_active_object.update_from_editmode()
 
-        context.scene.update()
+        #context.scene.update()
 
         if origin_mode == 'EDIT':
-            vertices = [(vertex, origin_active_object.matrix_world * vertex.co) for vertex in origin_active_object.data.vertices if vertex.select]
+            vertices = [(vertex, origin_active_object.matrix_world @ vertex.co) for vertex in origin_active_object.data.vertices if vertex.select]
             indices = [vertex[0].index for vertex in vertices]
         else:
             vertices = []
             for object in context.selected_objects:
-                vertices += [(vertex, origin_active_object.matrix_world * vertex.co) for vertex in origin_active_object.data.vertices]
+                vertices += [(vertex, origin_active_object.matrix_world @ vertex.co) for vertex in origin_active_object.data.vertices]
                 if object != origin_active_object:
-                    vertices += [(vertex, object.matrix_world * vertex.co) for vertex in object.data.vertices]
+                    vertices += [(vertex, object.matrix_world @ vertex.co) for vertex in object.data.vertices]
 
         if origin_mode == 'OBJECT':
 
             data = bpy.data.meshes.new(name='point_data')
             data.from_pydata(vertices=[vertex[1] for vertex in vertices], edges=[], faces=[])
             object = bpy.data.objects.new(name='point_data', object_data=data)
-            context.scene.objects.link(object)
+            context.scene.collection.objects.link(object)
             object.update_from_editmode()
 
         else:
@@ -62,7 +62,7 @@ class lattice:
             data = bpy.data.meshes.new(name='point_data')
             data.from_pydata(vertices=[vertex[1] for vertex in vertices], edges=[], faces=[])
             object = bpy.data.objects.new(name='point_data', object_data=data)
-            context.scene.objects.link(object)
+            context.scene.collection.objects.link(object)
             object.update_from_editmode()
 
         mesh = bmesh.new()
@@ -97,12 +97,12 @@ class lattice:
             lattice_modifier.object = lattice_object
             lattice_modifier.vertex_group = vertex_group.name
 
-        context.scene.objects.link(object=lattice_object)
-        context.scene.objects.active = lattice_object
+        context.scene.collection.objects.link(object=lattice_object)
+        context.view_layer.objects.active = lattice_object
 
         lattice_object['fast-lattice'] = "{}:{}:{}:{}:{}:{}:{}:{}:{}".format(origin_active_object.name if origin_mode == 'EDIT' else [object.name for object in context.selected_objects if object.type == 'MESH'], vertex_group.name if origin_mode == 'EDIT' else None, lattice_modifier.name, lattice_object.name, lattice_object.data.name, origin_active_object.show_wire if origin_mode == 'EDIT' else [object.show_wire for object in context.selected_objects if object.type == 'MESH'], origin_active_object.show_all_edges if origin_mode == 'EDIT' else [object.show_all_edges for object in context.selected_objects if object.type == 'MESH'], origin_active_object.name, origin_mode)
 
-        context.scene.update()
+        #context.scene.update()
 
         for i in range(0, 3):
 
@@ -122,7 +122,7 @@ class lattice:
         lattice_object.location = self.location(coordinates)
         lattice_object.scale = self.scale(coordinates, self.minimum_matrix)
 
-        lattice_object.show_x_ray = True
+        lattice_object.show_in_front = True
 
         lattice_data.interpolation_type_u = self.interpolation_type
         lattice_data.interpolation_type_v = self.interpolation_type
@@ -174,19 +174,19 @@ class lattice:
 
     def location(self, coordinates):
 
-        vertices = [self.minimum_matrix * vertex for vertex in coordinates]
+        vertices = [self.minimum_matrix @ vertex for vertex in coordinates]
 
         x = [vertex.x for vertex in vertices]
         y = [vertex.y for vertex in vertices]
         z = [vertex.z for vertex in vertices]
 
-        return self.minimum_matrix.inverted() * (sum(self.bounds(x, y, z), Vector()) / len(self.bounds(x, y, z)))
+        return self.minimum_matrix.inverted() @ (sum(self.bounds(x, y, z), Vector()) / len(self.bounds(x, y, z)))
 
 
     @staticmethod
     def scale(coordinates, matrix):
 
-        vertices = [matrix * coordinate for coordinate in coordinates]
+        vertices = [matrix @ coordinate for coordinate in coordinates]
 
         x = [vertex.x for vertex in vertices]
         y = [vertex.y for vertex in vertices]
@@ -222,12 +222,12 @@ def cleanup(context):
     prop = context.object['fast-lattice'].split(':')
 
     for index, object_name in enumerate(list(prop[0].strip('[]').split(', '))):
-        context.scene.objects.active = bpy.data.objects[object_name[1:-1]] if prop[8] == 'OBJECT' else bpy.data.objects[object_name]
+        context.view_layer.objects.active = bpy.data.objects[object_name[1:-1]] if prop[8] == 'OBJECT' else bpy.data.objects[object_name]
         context.active_object.show_wire = True if list(prop[5])[index] == 'True' else False
         context.active_object.show_all_edges = True if list(prop[6])[index] == 'True' else False
         bpy.ops.object.modifier_apply(apply_as='DATA', modifier=context.active_object.modifiers[prop[2]].name)
 
-    context.scene.objects.active = bpy.data.objects[prop[7]]
+    context.view_layer.objects.active = bpy.data.objects[prop[7]]
 
     if len(prop[0]) == 1:
         context.active_object.vertex_groups.remove(group=context.active_object.vertex_groups[prop[1]])

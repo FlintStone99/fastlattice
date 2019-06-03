@@ -7,7 +7,7 @@ from .config import defaults as default
 
 class fast_lattice(PropertyGroup):
 
-    method = EnumProperty(
+    method: EnumProperty(
         name = 'Conforming Method',
         description = 'Method to use when conforming the lattice to your selection',
         items = [
@@ -17,7 +17,7 @@ class fast_lattice(PropertyGroup):
         default = default['method']
     )
 
-    accuracy = FloatProperty(
+    accuracy: FloatProperty(
         name = 'Accuracy',
         description = 'How accurate the lattice will conform to the selection (Increasing this value takes longer to calculate)',
         min = 0.001,
@@ -26,7 +26,7 @@ class fast_lattice(PropertyGroup):
         default = default['accuracy']
     )
 
-    interpolation_type = EnumProperty(
+    interpolation_type: EnumProperty(
         name = 'Interpolation Type',
         description = 'Interpolation type to use for the created lattice',
         items = [
