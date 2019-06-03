@@ -17,7 +17,7 @@ bl_info = {
     'author': 'Trentin Frederick (proxe)',
     'version': (0, '6a', 29),
     'blender': (2, 80, 0),
-    'location': '3D View \N{Rightwards Arrow} Toolshelf \N{Rightwards Arrow} Edit/Mesh Tools/Lattice Tools',
+    'location': '3D View \N{Rightwards Arrow} N-Panel \N{Rightwards Arrow} Lattice',
     'description': 'Quickly add and edit a lattice object that effects and conforms to the selection.',
     'warning': 'Beta',
     # 'wiki_url': '',
