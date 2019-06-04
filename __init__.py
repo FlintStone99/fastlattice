@@ -14,7 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 bl_info = {
     'name': 'Fast Lattice',
-    'author': 'Trentin Frederick (proxe)',
+    'author': 'proxe',
     'version': (0, '6a', 29),
     'blender': (2, 80, 0),
     'location': '3D View \N{Rightwards Arrow} N-Panel \N{Rightwards Arrow} Lattice',
